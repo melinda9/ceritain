@@ -32,10 +32,25 @@ self.addEventListener('push', (event) => {
   console.log('Service worker pushing...');
 
   async function chainPromise() {
-    const data = await event.data.json();
-    await self.registration.showNotification(data.title, {
-      body: data.options.body,
-    });
+    let data = {};
+    if (event.data) {
+      try {
+        data = event.data.json();
+      } catch (error) {
+        console.warn('Push payload is not valid JSON, falling back to text:', error);
+        const textData = await event.data.text();
+        data = { title: 'Notifikasi Baru', body: textData };
+      }
+    }
+
+    const title = data.title || 'Notifikasi Baru';
+    const options = {
+      body: data.body || 'Ada notifikasi baru untuk Anda.',
+      icon: '/images/favicon.png',
+      badge: '/images/icons/icon-72x72.png',
+    };
+
+    await self.registration.showNotification(title, options);
   }
 
   event.waitUntil(chainPromise());

@@ -36,28 +36,50 @@ if (workbox) {
 self.addEventListener('push', (event) => {
   console.log('Push event received:', event);
 
-  let notificationData = {};
   if (event.data) {
-    notificationData = event.data.json();
+    event.waitUntil(
+      event.data.text().then(textData => {
+        let notificationData = {};
+        let url = '/';
+        try {
+          notificationData = JSON.parse(textData);
+          url = notificationData.url || '/';
+        } catch (e) {
+          notificationData = { title: 'Notifikasi', body: textData };
+        }
+        self.registration.showNotification(
+          notificationData.title || 'Ada cerita baru untuk Anda!',
+          {
+            body: notificationData.body || 'cerita baru masuk nih',
+            icon: notificationData.icon || '/images/icons/icon-192x192.png',
+            badge: notificationData.badge || '/images/icons/icon-72x72.png',
+            data: { url }
+          }
+        );
+      }).catch(e => {
+        self.registration.showNotification('Notifikasi Error', {
+          body: 'Data notifikasi tidak valid.'
+        });
+      })
+    );
+  } else {
+    event.waitUntil(
+      self.registration.showNotification('Ada cerita baru untuk Anda!', {
+        body: 'cerita baru masuk nih',
+        icon: '/images/icons/icon-192x192.png',
+        badge: '/images/icons/icon-72x72.png',
+        data: { url: '/' }
+      })
+    );
   }
-
-  const title = notificationData.title || 'Ada cerita baru untuk Anda!';
-  const options = {
-    body: notificationData.body || 'Cerita baru masuk nih',
-    icon: notificationData.icon || '/images/icons/icon-192x192.png',
-    badge: notificationData.badge || '/images/icons/icon-72x72.png',
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
 });
 
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification click received:', event);
   event.notification.close();
 
+  const urlToOpen = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
   event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
+    clients.openWindow(urlToOpen)
   );
 });

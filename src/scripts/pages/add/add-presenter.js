@@ -57,13 +57,14 @@ const AddPresenter = {
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
-          const payload = JSON.stringify({
+          const payload = {
             title: "Ada cerita baru untuk Anda!",
             body: "Cerita baru masuk nih",
-          });
+            icon: "/images/favicon.png",
+          };
           await fetch('/api/send-notification', {
             method: 'POST',
-            body: payload,
+            body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' },
           });
         }
