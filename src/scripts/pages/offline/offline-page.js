@@ -11,7 +11,6 @@ const OfflinePage = {
       <section class="offline-section">
         <h2>Cerita Offline</h2>
         <ul id="offline-story-list" class="offline-story-list offline-grid"></ul>
-        <button id="clearOfflineBtn">Hapus Semua Cerita Offline</button>
       </section>
     `;
   },
@@ -22,6 +21,8 @@ const OfflinePage = {
     if (!ceritaList.length) {
       list.innerHTML = '<li>Tidak ada cerita offline.</li>';
     } else {
+      // Sort stories by createdAt in descending order
+      ceritaList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       list.innerHTML = ceritaList.map(cerita => `
         <li class="offline-story-card">
           <img src="${cerita.photoUrl}" alt="Foto oleh ${cerita.name || 'Tanpa Nama'}" class="offline-story-image">
@@ -41,13 +42,6 @@ const OfflinePage = {
         await this.showOfflineStories();
       });
     });
-    // Hapus semua
-    document.getElementById('clearOfflineBtn').onclick = async () => {
-      for (const cerita of ceritaList) {
-        await deleteStoryIDB(cerita.id);
-      }
-      await this.showOfflineStories();
-    };
   }
 };
 

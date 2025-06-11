@@ -249,6 +249,26 @@ h1 {
   color: #181c24;
 }
 
+/* Added styles for #clearOfflineBtn to match #logoutButton */
+#clearOfflineBtn {
+  border: none;
+  background: var(--accent);
+  color: #232a34;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0.5em 1.2em;
+  font-size: 1rem;
+  transition: background var(--transition), color var(--transition);
+  margin-left: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+#clearOfflineBtn:hover {
+  background: #fffbe6;
+  color: #181c24;
+}
+
 #main-content {
   padding: 2.5em 2em;
   max-width: 900px;

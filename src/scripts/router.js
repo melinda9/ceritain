@@ -1,8 +1,8 @@
 import NotFoundPage from './pages/not-found/not-found-page.js';
+import HomePage from './pages/home/home-page.js';
 
 const routes = {
-  // ...existing code...
-  // contoh: '/home': HomePage,
+  '/home': HomePage,
   // ...existing code...
 };
 

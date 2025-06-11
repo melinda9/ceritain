@@ -2,7 +2,6 @@ import { postStoryWithLocation } from "../../data/repository.js";
 import { initCamera, captureImage, stopCamera } from "../../utils/camera.js";
 import AddView from "./add-page.js";
 import UserModel from "../../data/user-model.js";
-import NotificationPresenter from "../notification/notification-presenter.js";
 
 const AddPresenter = {
   async init() {
@@ -52,9 +51,6 @@ const AddPresenter = {
     try {
       await postStoryWithLocation(f);
       AddView.showMessage("Cerita berhasil terkirim.");
-      const n = { title: "Baru", body: "Dibuat." };
-      localStorage.setItem("lastNotif", JSON.stringify(n));
-      NotificationPresenter.saveNotification(n);
       stopCamera();
       AddView.resetForm();
       setTimeout(() => { window.location.hash = "#/home"; }, 400);

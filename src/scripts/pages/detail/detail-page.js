@@ -115,6 +115,13 @@ const DetailPage = {
 
     // Layer default
     osmLayer.addTo(map);
+  },
+
+  // Added addNotifyMeEventListener method
+  addNotifyMeEventListener() {
+    document.getElementById('report-detail-notify-me').addEventListener('click', () => {
+      this.presenter.notifyMe();
+    });
   }
 };
 

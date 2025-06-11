@@ -16,7 +16,10 @@ module.exports = merge(common, {
     ],
   },
   devServer: {
-    static: path.resolve(__dirname, 'dist'),
+    static: [
+      path.resolve(__dirname, 'dist'),
+      path.resolve(__dirname, 'public'),
+    ],
     port: 9000,
     client: {
       overlay: {

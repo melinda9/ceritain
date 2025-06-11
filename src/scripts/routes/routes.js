@@ -1,5 +1,3 @@
-
-
 import HomePresenter from '../pages/home/home-presenter.js';
 import HomeView from '../pages/home/home-page.js';
 import AboutPresenter from '../pages/about/about-presenter.js';
@@ -10,7 +8,6 @@ import RegisterPresenter from '../pages/register/register-presenter.js';
 import AddPresenter from '../pages/add/add-presenter.js';
 import DetailPresenter from '../pages/detail/detail-presenter.js';
 import DetailView from '../pages/detail/detail-page.js';
-import NotificationPresenter from '../pages/notification/notification-presenter.js';
 import OfflinePresenter from '../pages/offline/offline-presenter.js';
 import NotFoundPresenter from '../pages/notfound/notfound-presenter.js';
 import UrlParser from './url-parser.js';
@@ -52,9 +49,6 @@ const routes = {
       },
       urlParser: UrlParser
     })
-  },
-  '/notification': {
-    init: () => NotificationPresenter.init()
   },
   // Not Found fallback
   '*': {

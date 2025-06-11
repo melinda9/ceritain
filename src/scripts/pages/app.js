@@ -1,10 +1,42 @@
 import UrlParser from '../routes/url-parser.js';
 import routes from '../routes/routes.js';
 import Navbar from '../components/navbar.js';
+import { isServiceWorkerAvailable } from '../utils';
+import { generateSubscribeButtonTemplate, generateUnsubscribeButtonTemplate } from '../templates';
+import { subscribe, isCurrentPushSubscriptionAvailable, unsubscribe } from '../utils/notification-helper';
 
 const App = {
   previousPage: null,
   lastRoute: null,
+
+  // Ensure push-notification-tools is rendered before calling setupPushNotification
+  async setupPushNotification() {
+    const pushNotificationTools = document.getElementById('push-notification-tools');
+    if (!pushNotificationTools) {
+      console.error('Element push-notification-tools not found in DOM');
+      return;
+    }
+
+    const isSubscribed = await isCurrentPushSubscriptionAvailable();
+
+    if (isSubscribed) {
+      pushNotificationTools.innerHTML = generateUnsubscribeButtonTemplate();
+      document.getElementById('unsubscribe-button').addEventListener('click', () => {
+        unsubscribe().finally(() => {
+          this.setupPushNotification();
+        });
+      });
+
+      return;
+    }
+
+    pushNotificationTools.innerHTML = generateSubscribeButtonTemplate();
+    document.getElementById('subscribe-button').addEventListener('click', () => {
+      subscribe().finally(() => {
+        this.setupPushNotification();
+      });
+    });
+  },
 
   async renderPage() {
     const token = localStorage.getItem("token");
@@ -65,7 +97,16 @@ const App = {
     }
 
     this.previousPage = page;
+
+    if (isServiceWorkerAvailable()) {
+      this.setupPushNotification();
+    }
   },
 };
+
+// Ensure setupPushNotification is called after DOM is fully loaded
+window.addEventListener('DOMContentLoaded', () => {
+  App.setupPushNotification();
+});
 
 export default App;

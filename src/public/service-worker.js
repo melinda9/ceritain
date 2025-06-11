@@ -33,31 +33,20 @@ if (workbox) {
 }
 
 // Langkah 2: Menangani push notifikasi di service worker
-self.addEventListener('push', (event) => {
-  console.log('Push event received:', event);
-
-  let notificationData = {};
-  if (event.data) {
-    notificationData = event.data.json();
-  }
-
-  const title = notificationData.title || 'Ada cerita baru untuk Anda!';
+self.addEventListener('push', function(event) {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Notifikasi Baru';
   const options = {
-    body: notificationData.body || 'Cerita baru masuk nih',
-    icon: notificationData.icon || '/images/icons/icon-192x192.png',
-    badge: notificationData.badge || '/images/icons/icon-72x72.png',
+    body: data.body || 'Ada notifikasi baru untuk Anda.',
+    icon: '/images/favicon.png',
+    data: data.url || '/',
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
-  console.log('Notification click received:', event);
+self.addEventListener('notificationclick', function(event) {
   event.notification.close();
-
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
-  );
+  const url = event.notification.data;
+  event.waitUntil(clients.openWindow(url));
 });

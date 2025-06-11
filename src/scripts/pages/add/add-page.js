@@ -44,7 +44,7 @@ const AddPage = {
             </div>
             <div id="image-preview" style="margin-top:0.5em;">
               <h4 style="margin-bottom:0.7em;">Preview Gambar :</h4>
-              <img id="preview-img" src="" alt="Preview gambar hasil kamera atau upload" style="max-width: 100%; display: none; margin-top:0.7em;" />
+              <img id="preview-img" src="" alt="Preview gambar hasil kamera atau upload" style="width: 100%; height: auto; display: none; margin-top:0.7em;" />
             </div>
           </div>
 
@@ -63,11 +63,12 @@ const AddPage = {
 
           <button type="submit" id="submitButton" style="margin-top:1.5em"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
         </form>
-      </section>
+
+        
     `;
   },
 
-  initView({ onSubmit, onCapture, onMapClick }) {
+  initView({ onSubmit, onCapture, onMapClick, onSubscribe }) {
 
 
     const form = document.getElementById("storyForm");
@@ -132,6 +133,7 @@ const AddPage = {
         }
       }, 100);
     });
+
 
     const map = L.map("map").setView([-6.2, 106.816666], 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

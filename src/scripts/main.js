@@ -1,13 +1,3 @@
-// Listen for notification from service worker and save to localStorage
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'NEW_NOTIFICATION') {
-      import('./pages/notification/notification-presenter.js').then(({ default: NotificationPresenter }) => {
-        NotificationPresenter.saveNotification({ title: event.data.title, body: event.data.body });
-      });
-    }
-  });
-}
 import App from './pages/app';
 import '../styles/style.css';
 import { withViewTransition } from './utils/view-transition.js';
@@ -24,23 +14,6 @@ if ('serviceWorker' in navigator) {
     try {
       const reg = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered:', reg.scope);
-
-      // Push Notification: Request permission
-      if ('PushManager' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          // Replace with your VAPID public key from API
-          const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY';
-          const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-          const subscription = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey
-          });
-          // Kirim subscription ke server API jika diperlukan
-          // await fetch('/api/save-subscription', { method: 'POST', body: JSON.stringify(subscription), headers: { 'Content-Type': 'application/json' } });
-          console.log('Push subscription:', subscription);
-        }
-      }
     } catch (err) {
       console.error('Service Worker registration or Push failed:', err);
     }
@@ -51,6 +24,18 @@ if ('serviceWorker' in navigator) {
     e.preventDefault();
     deferredPrompt = e;
     showInstallButton();
+  });
+}
+
+// Langkah 1: Meminta izin notifikasi
+if ('Notification' in window && 'serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      console.log('Notifikasi diizinkan oleh pengguna.');
+    } else {
+      console.log('Notifikasi ditolak oleh pengguna.');
+    }
   });
 }
 
