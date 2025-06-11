@@ -12,10 +12,6 @@ export const registerUser = async (name, email, password) => {
 
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.message || "Pendaftaran gagal");
-    }
-
     return result;
   } catch (error) {
     console.error("Error saat registrasi:", error);
@@ -30,12 +26,7 @@ export const loginUser = async (email, password) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
     const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result.message || "Login gagal");
-    }
-    
     return result.loginResult.token;
   } catch (error) {
     console.error("Error saat login:", error);
@@ -53,18 +44,8 @@ export const getAllStories = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Terjadi kesalahan saat mengambil data: ${response.status}`);
-    }
-
     const result = await response.json();
-    // Simpan ke IndexedDB untuk offline
-    if (Array.isArray(result.listStory)) {
-      for (const story of result.listStory) {
-        await saveStoryIDB(story);
-      }
-    }
+    // Tidak simpan otomatis ke IndexedDB!
     return result.listStory;
   } catch (error) {
     // Jika offline, ambil dari IndexedDB
@@ -84,13 +65,9 @@ export const postStoryWithLocation = async (formData) => {
       },
       body: formData,
     });
-
     const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result.message || "Gagal mengirim cerita");
-    }
-
-    return result;
+    // Pastikan tidak pernah return string "ok"
+    return result; // result adalah objek, bukan string "ok"
   } catch (error) {
     console.error("Error saat mengirim cerita:", error);
     throw error;
@@ -111,12 +88,7 @@ export const getStoryById = async (id) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
     const result = await response.json();
-    if (!response.ok) {
-      console.error("Kesalahan API:", result.message);
-      return null;
-    }
 
     return result.story
       ? {

@@ -1,8 +1,9 @@
-import { postStoryWithLocation } from "../../data/repository.js";
-import { initCamera, captureImage, stopCamera } from "../../utils/camera.js";
-import AddView from "./add-page.js";
-import UserModel from "../../data/user-model.js";
-import NotificationPresenter from "../notification/notification-presenter.js";
+import { postStoryWithLocation } from "./data/repository.js";
+import { initCamera, captureImage, stopCamera } from "./utils/camera.js";
+import AddView from "./pages/add/add-page.js";
+import UserModel from "./data/user-model.js";
+import NotificationPresenter from "./pages/notification/notification-presenter.js";
+import { registerServiceWorker } from "./utils/index.js";
 
 const AddPresenter = {
   async init() {
@@ -71,8 +72,6 @@ const AddPresenter = {
 
 export default AddPresenter;
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
-  });
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  await registerServiceWorker();
+});

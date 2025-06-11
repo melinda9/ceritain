@@ -51,7 +51,7 @@ const AddPresenter = {
 
     try {
       await postStoryWithLocation(f);
-      AddView.showMessage("OK");
+      AddView.showMessage("Cerita berhasil terkirim.");
       const n = { title: "Baru", body: "Dibuat." };
       localStorage.setItem("lastNotif", JSON.stringify(n));
       NotificationPresenter.saveNotification(n);

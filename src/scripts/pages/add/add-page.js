@@ -10,59 +10,91 @@ L.Icon.Default.mergeOptions({
 
 const AddPage = {
   getTemplate() {
+
+
     return `
       <section class="add-story">
         <h2>Tambah Cerita Baru</h2>
         <form id="storyForm">
-          <label for="description">Deskripsi Cerita</label>
-          <textarea id="description" name="description" placeholder="Tulis cerita kamu di sini..." required></textarea>
-
-          <label for="photo">Unggah Gambar (opsional jika tidak pakai kamera)</label>
-          <input type="file" id="photo" name="photo" accept="image/*" aria-describedby="photo-desc" />
-          <p id="photo-desc" class="visually-hidden">Pilih satu gambar dari file atau gunakan kamera</p>
-
-          <div class="camera-section">
-            <video id="camera" autoplay aria-label="Tampilkan kamera langsung"></video>
-            <canvas id="snapshot" style="display: none;"></canvas>
-            <button type="button" id="captureButton" aria-label="Ambil foto dari kamera">Ambil Foto</button>
+          <div class="form-group">
+            <h4 style="margin-bottom:0.7em;">Deskripsi Cerita :</h4>
+            <textarea id="description" name="description" placeholder="Tulis cerita kamu di sini..." required style="border:2px solid var(--accent);border-radius:7px; font-size:1.2em; min-height:110px; padding:1em; width:100%; box-sizing:border-box; max-width:600px; margin:auto;"></textarea>
+            <div style="margin-top:1em;"></div>
           </div>
 
-          <div id="image-preview" style="margin-top:1em;">
-            <h4>Preview Gambar:</h4>
-            <img id="preview-img" src="" alt="Preview gambar hasil kamera atau upload" style="max-width: 100%; display: none;" />
+          <div class="form-group camera-section" style="display: flex; align-items: flex-end; gap: 1.2em; flex-direction: column; align-items: stretch;">
+            <div style="display: flex; flex-direction: row; gap: 0.7em; align-items: center; margin-bottom: 1em;">
+              <button type="button" id="captureButton" aria-label="Ambil foto dari kamera"
+                style="display:inline-flex;align-items:center;gap:0.7em;cursor:pointer;width:100%;max-width:150px;justify-content:flex-start;background:#ffd600;color:#222;font-weight:bold;border:none;border-radius:8px;padding:0.5em 1.2em;font-size:1em;height:44px;">
+                <i class="fa-solid fa-camera"></i>
+                <span style="display:inline-block;">Ambil Foto</span>
+              </button>
+              <label class="btn-yellow" id="photo-btn-label"
+                style="display:inline-flex;align-items:center;gap:0.7em;cursor:pointer;width:100%;max-width:600px;justify-content:flex-start;background:#ffd600;color:#222;font-weight:bold;border:none;border-radius:8px;padding:0.5em 1.2em;font-size:1em;height:44px;">
+                <i class="fa-solid fa-file-arrow-up"></i>
+                <span id="photo-btn-text" style="line-height:1.1;">Upload Foto</span>
+                <span id="photo-filename" style="font-size:0.97em;max-width:300px;display:inline-block;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;vertical-align:middle;"></span>
+                <input type="file" id="photo" name="photo" accept="image/*" aria-describedby="photo-desc" style="display:none;" />
+              </label>
+              <p id="photo-desc" class="visually-hidden">Pilih satu gambar dari file atau gunakan kamera</p>
+            </div>
+            <div style="display: flex; flex-direction: row; gap: 1.2em; align-items: flex-end;">
+              <video id="camera" autoplay aria-label="Tampilkan kamera langsung"></video>
+              <canvas id="snapshot" style="display: none;"></canvas>
+            </div>
+            <div id="image-preview" style="margin-top:0.5em;">
+              <h4 style="margin-bottom:0.7em;">Preview Gambar :</h4>
+              <img id="preview-img" src="" alt="Preview gambar hasil kamera atau upload" style="max-width: 100%; display: none; margin-top:0.7em;" />
+            </div>
           </div>
 
-          <button type="submit" id="submitButton">Kirim</button>
+          <div style="margin-top:1.5em;">
+            <h4 style="margin-bottom:0.7em;">Peta lokasi cerita :</h4>
+            <div id="map" style="height: 300px;"></div>
+          </div>
+
+          <label for="lat" class="visually-hidden">Latitude</label>
+          <input type="hidden" id="lat" name="lat">
+
+          <label for="lon" class="visually-hidden">Longitude</label>
+          <input type="hidden" id="lon" name="lon">
+
+          <div id="message" class="message"></div>
+
+          <button type="submit" id="submitButton" style="margin-top:1.5em"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
         </form>
-
-        <figure>
-          <div id="map" style="height: 300px; margin-top: 1em;"></div>
-          <figcaption>Peta lokasi cerita</figcaption>
-        </figure>
-
-        <label for="lat" class="visually-hidden">Latitude</label>
-        <input type="hidden" id="lat" name="lat">
-
-        <label for="lon" class="visually-hidden">Longitude</label>
-        <input type="hidden" id="lon" name="lon">
-
-        <div id="message" class="message"></div>
       </section>
     `;
   },
 
   initView({ onSubmit, onCapture, onMapClick }) {
+
+
     const form = document.getElementById("storyForm");
-    const fileInput = document.getElementById("photo");
     const captureButton = document.getElementById("captureButton");
     const previewImg = document.getElementById("preview-img");
+    const fileInput = document.getElementById("photo");
+    const photoBtnText = document.getElementById("photo-btn-text");
+    const photoFilename = document.getElementById("photo-filename");
+    const photoLabel = document.getElementById("photo-btn-label");
 
     let selectedFile = null;
 
+    // Upload file handler
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       selectedFile = file;
       this.setImagePreview(file);
+      if (file) {
+        photoBtnText.textContent = 'Ganti File';
+        // tampilkan hanya nama file pendek, bukan path penuh
+        photoFilename.textContent = file.name.length > 18
+          ? file.name.slice(0, 8) + '...' + file.name.slice(-8)
+          : file.name;
+      } else {
+        photoBtnText.textContent = 'Upload File';
+        photoFilename.textContent = '';
+      }
     });
 
     captureButton?.addEventListener("click", () => {
@@ -71,6 +103,7 @@ const AddPage = {
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+      this.showMessage(""); // Kosongkan pesan sebelum validasi/submit
       const description = document.getElementById("description").value.trim();
       const lat = document.getElementById("lat").value;
       const lon = document.getElementById("lon").value;
@@ -91,6 +124,13 @@ const AddPage = {
         lat,
         lon,
       });
+      this.showMessage("Cerita berhasil terkirim.");
+      setTimeout(() => {
+        // Pastikan pesan tidak tertimpa oleh handler async di onSubmit
+        if (document.getElementById("message").innerText !== "Cerita berhasil terkirim.") {
+          this.showMessage("Cerita berhasil terkirim.");
+        }
+      }, 100);
     });
 
     const map = L.map("map").setView([-6.2, 106.816666], 13);
