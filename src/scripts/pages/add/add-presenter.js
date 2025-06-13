@@ -1,7 +1,9 @@
+
 import { postStoryWithLocation } from "../../data/repository.js";
 import { initCamera, captureImage, stopCamera } from "../../utils/camera.js";
 import AddView from "./add-page.js";
 import UserModel from "../../data/user-model.js";
+import { isNotificationAvailable, isNotificationGranted } from "../../utils/notification-helper.js";
 
 const AddPresenter = {
   async init() {
@@ -52,20 +54,14 @@ const AddPresenter = {
       await postStoryWithLocation(f);
       AddView.showMessage("Cerita berhasil terkirim.");
 
-      // Trigger push notification
-      if ('serviceWorker' in navigator && 'PushManager' in window) {
+      // Tampilkan notifikasi browser setelah submit sukses HANYA jika user sudah subscribe push notification
+      if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
+        // Cek apakah user sudah subscribe push notification
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
-          const payload = {
-            title: "Ada cerita baru untuk Anda!",
-            body: "Cerita baru masuk nih",
-            icon: "/images/favicon.png",
-          };
-          await fetch('/api/send-notification', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' },
+          registration.showNotification('Cerita baru masuk!', {
+            body: 'Ada cerita baru masuk nih.'
           });
         }
       }

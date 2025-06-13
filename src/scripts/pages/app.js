@@ -17,24 +17,29 @@ const App = {
       return;
     }
 
-    const isSubscribed = await isCurrentPushSubscriptionAvailable();
+    // Gunakan cache status subscribe agar tidak auto-refresh ke subscribe sebelum user klik unsubscribe
+    // Perbaikan: cek status subscribe hanya saat pertama kali load, dan JANGAN reset _isSubscribed di renderPage
+    if (typeof this._isSubscribed === 'undefined') {
+      this._isSubscribed = await isCurrentPushSubscriptionAvailable();
+    }
 
-    if (isSubscribed) {
+    if (this._isSubscribed) {
       pushNotificationTools.innerHTML = generateUnsubscribeButtonTemplate();
-      document.getElementById('unsubscribe-button').addEventListener('click', () => {
-        unsubscribe().finally(() => {
-          this.setupPushNotification();
-        });
+      const unsubBtn = document.getElementById('unsubscribe-button');
+      unsubBtn.addEventListener('click', async () => {
+        await unsubscribe();
+        this._isSubscribed = false;
+        this.setupPushNotification();
       });
-
       return;
     }
 
     pushNotificationTools.innerHTML = generateSubscribeButtonTemplate();
-    document.getElementById('subscribe-button').addEventListener('click', () => {
-      subscribe().finally(() => {
-        this.setupPushNotification();
-      });
+    const subBtn = document.getElementById('subscribe-button');
+    subBtn.addEventListener('click', async () => {
+      await subscribe();
+      this._isSubscribed = true;
+      this.setupPushNotification();
     });
   },
 
@@ -98,7 +103,10 @@ const App = {
 
     this.previousPage = page;
 
+    // Jangan reset this._isSubscribed setiap renderPage agar status tombol tetap konsisten
     if (isServiceWorkerAvailable()) {
+      // Selalu panggil setupPushNotification agar tombol tetap sinkron dengan status subscription,
+      // tapi cache status _isSubscribed hanya diubah oleh aksi subscribe/unsubscribe, bukan setiap renderPage
       this.setupPushNotification();
     }
   },

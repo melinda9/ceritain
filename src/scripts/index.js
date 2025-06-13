@@ -67,12 +67,35 @@ const AddPresenter = {
   },
 };
 
-export default AddPresenter;
-
 document.addEventListener('DOMContentLoaded', async () => {
-  await registerServiceWorker();
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('Service Worker registered successfully.');
 
-  window.addEventListener('hashchange', async () => {
-    await App.renderPage();
-  });
+      // Tes push notifikasi
+      registration.showNotification('Push Notification', {
+        body: 'Ini adalah notifikasi push!',
+        icon: '/images/favicon.png',
+      });
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+    }
+  }
 });
+
+export function generateSubscribeButtonTemplate() {
+  return `
+    <button id="subscribe-button" style="background-color: yellow; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+      Subscribe to Notifications
+    </button>
+  `;
+}
+
+export function generateUnsubscribeButtonTemplate() {
+  return `
+    <button id="unsubscribe-button" style="background-color: red; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+      Unsubscribe from Notifications
+    </button>
+  `;
+}

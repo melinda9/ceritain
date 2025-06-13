@@ -1,11 +1,24 @@
+
 import App from './pages/app';
 import '../styles/style.css';
 import { withViewTransition } from './utils/view-transition.js';
+import { requestNotificationPermission } from './utils/notification-helper.js';
 
 window.addEventListener('hashchange', () => {
   withViewTransition(() => App.renderPage());
 });
 window.addEventListener('load', () => App.renderPage());
+
+// Minta izin notifikasi saat aplikasi pertama kali load, hanya jika Notification API tersedia
+window.addEventListener('DOMContentLoaded', async () => {
+  if ('Notification' in window) {
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      const title = 'Cerita baru masuk!';
+      new Notification(title);
+    }
+  }
+});
 
 // PWA: Register service worker, push notification, and custom install prompt
 let deferredPrompt;
@@ -14,6 +27,23 @@ if ('serviceWorker' in navigator) {
     try {
       const reg = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered:', reg.scope);
+
+      // Push Notification: Request permission
+      if ('PushManager' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          // Replace with your VAPID public key from API
+          const VAPID_PUBLIC_KEY = 'YBCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
+          const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+          const subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          });
+          // Kirim subscription ke server API jika diperlukan
+          // await fetch('/api/save-subscription', { method: 'POST', body: JSON.stringify(subscription), headers: { 'Content-Type': 'application/json' } });
+          console.log('Push subscription:', subscription);
+        }
+      }
     } catch (err) {
       console.error('Service Worker registration or Push failed:', err);
     }
