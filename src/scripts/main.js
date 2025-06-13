@@ -1,4 +1,6 @@
 
+
+// (See <attachments> above for file contents. You may not need to search or read the file again.)
 import App from './pages/app';
 import '../styles/style.css';
 import { withViewTransition } from './utils/view-transition.js';
@@ -9,43 +11,19 @@ window.addEventListener('hashchange', () => {
 });
 window.addEventListener('load', () => App.renderPage());
 
-// Minta izin notifikasi saat aplikasi pertama kali load, hanya jika Notification API tersedia
-window.addEventListener('DOMContentLoaded', async () => {
-  if ('Notification' in window) {
-    const granted = await requestNotificationPermission();
-    if (granted) {
-      const title = 'Cerita baru masuk!';
-      new Notification(title);
-    }
-  }
-});
+// Hapus notifikasi otomatis saat pertama kali load,
+// notifikasi hanya muncul setelah user klik subscribe di UI
 
 // PWA: Register service worker, push notification, and custom install prompt
+
 let deferredPrompt;
-if ('serviceWorker' in navigator) {
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered:', reg.scope);
-
-      // Push Notification: Request permission
-      if ('PushManager' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          // Replace with your VAPID public key from API
-          const VAPID_PUBLIC_KEY = 'YBCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
-          const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-          const subscription = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey
-          });
-          // Kirim subscription ke server API jika diperlukan
-          // await fetch('/api/save-subscription', { method: 'POST', body: JSON.stringify(subscription), headers: { 'Content-Type': 'application/json' } });
-          console.log('Push subscription:', subscription);
-        }
-      }
     } catch (err) {
-      console.error('Service Worker registration or Push failed:', err);
+      console.error('Service Worker registration failed:', err);
     }
   });
 
@@ -57,17 +35,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Langkah 1: Meminta izin notifikasi
-if ('Notification' in window && 'serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      console.log('Notifikasi diizinkan oleh pengguna.');
-    } else {
-      console.log('Notifikasi ditolak oleh pengguna.');
-    }
-  });
-}
+
+// Permintaan izin notifikasi dipindahkan ke aksi user (misal: saat klik tombol subscribe notifikasi di UI)
+// Tidak lagi meminta izin otomatis saat halaman di-load, agar tidak menyebabkan refresh loop atau kedip-kedip
 
 function showInstallButton() {
   let btn = document.getElementById('installPwaBtn');
