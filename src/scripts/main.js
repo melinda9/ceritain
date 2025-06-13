@@ -15,15 +15,17 @@ window.addEventListener('load', () => App.renderPage());
 // notifikasi hanya muncul setelah user klik subscribe di UI
 
 // PWA: Register service worker, push notification, and custom install prompt
-
 let deferredPrompt;
-if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered:', reg.scope);
+
+      // Push Notification: Request permission dipindahkan ke aksi user (misal: klik subscribe notifikasi)
+      // Tidak lagi meminta izin otomatis saat halaman di-load
     } catch (err) {
-      console.error('Service Worker registration failed:', err);
+      console.error('Service Worker registration or Push failed:', err);
     }
   });
 
@@ -36,7 +38,7 @@ if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
 }
 
 
-// Permintaan izin notifikasi dipindahkan ke aksi user (misal: saat klik tombol subscribe notifikasi di UI)
+// Permintaan izin notifikasi dipindahkan ke aksi user (misal: klik subscribe notifikasi di UI)
 // Tidak lagi meminta izin otomatis saat halaman di-load, agar tidak menyebabkan refresh loop atau kedip-kedip
 
 function showInstallButton() {
